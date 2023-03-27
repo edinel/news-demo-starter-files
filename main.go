@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	//"github.com/freshman-tech/news-demo-starter-files/news"
-	//"github.com/freshman-tech/news-demo-starter-files/tides"
-	"github.com/edinel/tides/news"
+	"github.com/edinel/web-tides/news"
+	tides "github.com/edinel/web-tides/tide"
+
 	"github.com/joho/godotenv"
 )
 
