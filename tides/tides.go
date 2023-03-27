@@ -1,6 +1,8 @@
 package tides
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Client struct {
 	http     *http.Client
@@ -8,6 +10,15 @@ type Client struct {
 	PageSize int
 }
 
+func NewClient(httpClient *http.Client, key string, pageSize int) *Client {
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	return &Client{httpClient, key, pageSize}
+}
+
+/*
 type tideResult struct {
 	Count    int `json:"count"`
 	Units    any `json:"units"`
@@ -92,11 +103,4 @@ type tideResult struct {
 	} `json:"stations"`
 	Self any `json:"self"`
 }
-
-func NewClient(httpClient *http.Client, key string, pageSize int) *tideClient {
-	if pageSize > 100 {
-		pageSize = 100
-	}
-
-	return &tideClient{httpClient, key, pageSize}
-}
+*/

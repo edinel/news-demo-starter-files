@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/freshman-tech/news-demo-starter-files/news"
+	"github.com/freshman-tech/news-demo-starter-files/tides"
 	"github.com/joho/godotenv"
 )
 
@@ -23,24 +24,29 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-tideHandler deals with tide URLs
-*/
-func tideHandler(w http.ResponseWriter, r *http.Request) {
-	url, err := url.Parse(r.URL.String())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+ *tideHandler deals with tide URLs.
+ *Takes an input of a pointer to a tides.Client (defined in tides.go) and an http HandlerFunk
+ *This uses a closure which means we're returning a function to the caller.  (I think)
+ *
+ */
+func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u, err := url.Parse(r.URL.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	params := url.Query()
-	tideQuery := params.Get("T")
-	page := params.Get("page")
-	if page == "" {
-		page = "1"
-	}
+		params := u.Query()
+		tideInput := params.Get("T")
+		page := params.Get("page")
+		if page == "" {
+			page = "1"
+		}
 
-	fmt.Println("Tide ID is: ", tideQuery)
-	fmt.Println("Page is: ", page)
+		fmt.Println("Tide Station is: ", tideInput)
+		fmt.Println("Page is: ", page)
+	}
 }
 
 /*
@@ -86,13 +92,13 @@ func main() {
 	myNewsClient := &http.Client{Timeout: 10 * time.Second}
 	newsapi := news.NewClient(myNewsClient, apiKey, 20)
 	myTideClient := &http.Client{Timeout: 10 * time.Second}
-	tideapi := tide.NewClient{myTideClient, apiKey, 20}
+	tideapi := tides.NewClient(myTideClient, apiKey, 20)
 
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	httpMux.HandleFunc("/", indexHandler)
 	httpMux.HandleFunc("/search", searchHandler(newsapi))
-	httpMux.HandleFunc("/tides", tideHandler)
+	httpMux.HandleFunc("/tides", tideHandler(tideapi))
 	http.ListenAndServe(":"+port, httpMux)
 }
 
