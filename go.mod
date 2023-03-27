@@ -1,6 +1,6 @@
 
 //module github.com/freshman-tech/news-demo-starter-files
-module github.com/edinel/tides
+module github.com/edinel/web-tides
 
 go 1.20
 
