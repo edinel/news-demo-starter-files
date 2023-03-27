@@ -1,12 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"net/url"
+	"os"
+	"time"
 
+	"github.com/freshman-tech/news-demo-starter-files/news"
 	"github.com/joho/godotenv"
 )
 
@@ -14,59 +17,59 @@ var tpl = template.Must(template.ParseFiles("index.html"))
 
 /*
 indexHandler tells you want to do with an index.
-*/func indexHandler(w http.ResponseWriter, r *http.Request) {
+*/
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tpl.Execute(w, nil)
 }
 
 /*
-searchHandler desls with searches.  Unclear how it gets passed in?
-
+tideHandler deals with tide URLs
 */
-func searchHandler(w http.ResponseWriter, r *http.Request) {
-	u, err := url.Parse(r.URL.String())
+func tideHandler(w http.ResponseWriter, r *http.Request) {
+	url, err := url.Parse(r.URL.String())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	params := u.Query()
-	searchQuery := params.Get("q")
+	params := url.Query()
+	tideQuery := params.Get("T")
 	page := params.Get("page")
 	if page == "" {
 		page = "1"
 	}
 
-	fmt.Println("Search Query is: ", searchQuery)
+	fmt.Println("Tide ID is: ", tideQuery)
 	fmt.Println("Page is: ", page)
 }
 
-
 /*
-tideHandler deals with tide URLs
+searchHandler desls with searches.  Unclear how it gets passed in?
 */
-func tideHandler(w http.ResponseWriter, r *httpRequest){
-	u, err:url.Parse(r.Url.String())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func searchHandler(newsapi *news.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		u, err := url.Parse(r.URL.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		params := u.Query()
+		searchQuery := params.Get("q")
+		page := params.Get("page")
+		if page == "" {
+			page = "1"
+		}
+
+		fmt.Println("Search Query is: ", searchQuery)
+		fmt.Println("Page is: ", page)
 	}
-	params := u.Query()
-	SearchQuery:= params.Get("q")
-	page := params.Get("Page")
-	if page ==""{
-		page = "1"
-	}
-
-	fmt.Println("Search Query is: ", searchQuery)
-	fmt.Println("Page is: ", page)
-
-
 }
 
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .evn file")
+		log.Println("Error loading .env file")
 	}
 	fs := http.FileServer(http.Dir("assets"))
 
@@ -75,14 +78,23 @@ func main() {
 		port = "8080"
 	}
 
+	apiKey := os.Getenv("NEWS_API_KEY")
+	if apiKey == "" {
+		log.Fatal("Env: apiKey must be set")
+	}
+
+	myNewsClient := &http.Client{Timeout: 10 * time.Second}
+	newsapi := news.NewClient(myNewsClient, apiKey, 20)
+	myTideClient := &http.Client{Timeout: 10 * time.Second}
+	tideapi := tide.NewClient{myTideClient, apiKey, 20}
+
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/assets/", http.StripPrefix("/assets/", fs))
 	httpMux.HandleFunc("/", indexHandler)
-	httpMux.HandleFunc("/search", searchHandler)
+	httpMux.HandleFunc("/search", searchHandler(newsapi))
 	httpMux.HandleFunc("/tides", tideHandler)
 	http.ListenAndServe(":"+port, httpMux)
 }
-
 
 /*
 
