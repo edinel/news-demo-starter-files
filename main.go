@@ -9,8 +9,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/freshman-tech/news-demo-starter-files/news"
-	"github.com/freshman-tech/news-demo-starter-files/tides"
+	//"github.com/freshman-tech/news-demo-starter-files/news"
+	//"github.com/freshman-tech/news-demo-starter-files/tides"
+	"github.com/edinel/tides/news"
 	"github.com/joho/godotenv"
 )
 
@@ -44,8 +45,18 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 			page = "1"
 		}
 
+		results, err := tidesapi.FetchEverything(tideInput, page)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		fmt.Println("Tide Station is: ", tideInput)
 		fmt.Println("Page is: ", page)
+		fmt.Printf("%+v", results)
+		//We need to do SOMETHING better than just dump these to stdout but maybe not tonight.
+
 	}
 }
 
@@ -67,12 +78,21 @@ func searchHandler(newsapi *news.Client) http.HandlerFunc {
 			page = "1"
 		}
 
-		fmt.Println("Search Query is: ", searchQuery)
+		results, err := newsapi.FetchEverything(searchQuery, page)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("Search Query was: ", searchQuery)
 		fmt.Println("Page is: ", page)
+		fmt.Printf("%+v", results)
+
 	}
 }
 
 func main() {
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Error loading .env file")
