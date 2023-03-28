@@ -92,16 +92,11 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 		}
 
 		buf := &bytes.Buffer{}
-		fmt.Printf("\n%+v", *tideQ)
 		err = tpl.Execute(buf, tideQ)
-
-		fmt.Printf("\n\nError: %s\n\n", err.Error())
-
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("Got Here - 5\n")
 		buf.WriteTo(w)
 
 	}
