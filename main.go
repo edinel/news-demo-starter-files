@@ -64,13 +64,10 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 
 		params := u.Query()
 		tideInput := params.Get("T")
-		page := params.Get("page")
-		if page == "" {
-			page = "1"
-		}
+		page := "1"
 
 		results, err := tidesapi.FetchTidePredictions(tideInput, page)
-		fmt.Printf("%+v\n", results)
+		//		fmt.Printf("%+v\n", results)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -84,9 +81,8 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 		}
 
 		tideQ := &TideSearch{
-			Station:  tideInput,
-			NextPage: nextPage,
-			//			TotalPages: int(math.Ceil(float64(results.TotalResults) / float64(newsapi.PageSize))),
+			Station:    tideInput,
+			NextPage:   nextPage,
 			TotalPages: 1,
 			Results:    results,
 		}
@@ -97,12 +93,9 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		tides.PrintTideStruct(*tideQ.Results, buf)
 		buf.WriteTo(w)
-
 	}
-	//	fmt.Println("Tide Station is: ", tideInput)
-	//	fmt.Println("Page is: ", page)
-	//	fmt.Printf("%+v", results)
 }
 
 /*

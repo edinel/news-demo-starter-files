@@ -31,9 +31,8 @@
         {{ range.Results.Predictions }}
         <li class="tide-output">
           <div>
-              <h3 class="Time">{{ .Time }}</h3>
-              <h3 class="Value">{{ .Value }}</h3>
-              <h3 class="HiLo">{{ .HiLo }}</h3>
+            <H3 class= "time">At {{ .Time  }} The tide will be {{ .Value }}
+            {{ if eq .HiLo  "H" }} above {{ else }} below  {{ end }} average </h3>
            </div>
         </li>
        {{ end }}
