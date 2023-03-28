@@ -20,6 +20,7 @@ func (c *Client) FetchTidePredictions(query, page string) (*Results, error) {
 	today := time.Now()
 	aweek := today.AddDate(0, 0, 7)
 	endpoint := fmt.Sprintf("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=%s&end_date=%s&station=%s&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=hilo&units=english&application=DataAPI_Sample&format=json", today.Format("20060102"), aweek.Format("20060102"), url.QueryEscape(query))
+	fmt.Printf("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=%s&end_date=%s&station=%s&product=predictions&datum=MLLW&time_zone=lst_ldt&interval=hilo&units=english&application=DataAPI_Sample&format=json", today.Format("20060102"), aweek.Format("20060102"), url.QueryEscape(query))
 
 	resp, err := c.http.Get(endpoint)
 	if err != nil {
