@@ -28,12 +28,12 @@
     </header>
     </section><section class="container">
       <ul class="tide-results">
-        {{ range.Results.predictions }}
+        {{ range.Results.Predictions }}
         <li class="tide-output">
           <div>
-              <h3 class="Time">{{ Results.Time }}</h3>
-              <h3 class="Value">{{ Results.Time.Value }}</h3>
-              <h3 class="HiLo">{{ Results.HiLo }}</h3>
+              <h3 class="Time">{{ .Time }}</h3>
+              <h3 class="Value">{{ .Value }}</h3>
+              <h3 class="HiLo">{{ .HiLo }}</h3>
            </div>
         </li>
        {{ end }}
