@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/edinel/web-tides/news"
@@ -17,11 +20,32 @@ import (
 
 var tpl = template.Must(template.ParseFiles("index.html"))
 
+type Search struct {
+	Query      string
+	NextPage   int
+	TotalPages int
+	Results    *news.Results
+}
+
+type TideSearch struct {
+	Station    string
+	NextPage   int
+	TotalPages int
+	Results    *tides.Results
+}
+
 /*
 indexHandler tells you want to do with an index.
 */
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	tpl.Execute(w, nil)
+	buf := &bytes.Buffer{}
+	err := tpl.Execute(buf, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	buf.WriteTo(w)
 }
 
 /*
@@ -31,7 +55,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
  *
  */
 func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) { //this is the part over my head
 		u, err := url.Parse(r.URL.String())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -45,19 +69,43 @@ func tideHandler(tidesapi *tides.Client) http.HandlerFunc {
 			page = "1"
 		}
 
-		results, err := tidesapi.FetchEverything(tideInput, page)
+		results, err := tidesapi.FetchTidePredictions(tideInput, page)
+		fmt.Printf("%+v\n", results)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		fmt.Println("Tide Station is: ", tideInput)
-		fmt.Println("Page is: ", page)
-		fmt.Printf("%+v", results)
-		//We need to do SOMETHING better than just dump these to stdout but maybe not tonight.
+		nextPage, err := strconv.Atoi(page)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		tideQ := &TideSearch{
+			Station:  tideInput,
+			NextPage: nextPage,
+			//			TotalPages: int(math.Ceil(float64(results.TotalResults) / float64(newsapi.PageSize))),
+			TotalPages: 1,
+			Results:    results,
+		}
+
+		buf := &bytes.Buffer{}
+		err = tpl.Execute(buf, tideQ)
+		fmt.Printf("\n\nError: %s\n\n", err.Error())
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("Got Here - 5\n")
+		buf.WriteTo(w)
 
 	}
+	//	fmt.Println("Tide Station is: ", tideInput)
+	//	fmt.Println("Page is: ", page)
+	//	fmt.Printf("%+v", results)
 }
 
 /*
@@ -84,9 +132,33 @@ func searchHandler(newsapi *news.Client) http.HandlerFunc {
 			return
 		}
 
+		nextPage, err := strconv.Atoi(page)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		search := &Search{
+			Query:      searchQuery,
+			NextPage:   nextPage,
+			TotalPages: int(math.Ceil(float64(results.TotalResults) / float64(newsapi.PageSize))),
+			Results:    results,
+		}
+
+		buf := &bytes.Buffer{}
+		err = tpl.Execute(buf, search)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		buf.WriteTo(w)
+
 		fmt.Println("Search Query was: ", searchQuery)
 		fmt.Println("Page is: ", page)
-		fmt.Printf("%+v", results)
+		//fmt.Printf("%+v", results)
+		//fmt.Printf("%#v\n", results)
+		//tides.PrintTideStruct(results)
 
 	}
 }
