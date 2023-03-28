@@ -11,61 +11,29 @@
   <h1>News App Demo</h1>
   <main>
     <header>
-        <!-- Write your comments here 
-  <a class="logo" href="/">News Demo</a>
-      <form action="/search" method="GET">
-        <input
-          autofocus
-          class="search-input"
-          value="{{ .Query }}"
-          placeholder="Enter a news topic"
-          type="search"
-          name="q"
-        />
-      </form> -->
       <a class="logo" href="/">Tides</a>
       <form action="/tides" method="GET">
         <input
           autofocus
           class="tide-input"
-          value="{{ .Tide }}"
+          value="{{ .Station }}"
           placeholder="Tide Station"
           type="Tides"
           name="T"
         />
       </form>
-      <a
-        href="https://github.com/freshman-tech/news"
+      <a href="https://github.com/freshman-tech/news"
         class="button github-button"
         >View on GitHub</a>
     </header>
-    <!-- Write your comments here 
-    <section class="container">
-      <ul class="search-results">
-        {{ range.Results.Articles }}
-        <li class="news-article">
-          <div>
-            <a target="_blank" rel="noreferrer noopener" href="{{.URL}}">
-              <h3 class="title">{{.Title }}</h3>
-            </a>
-            <p class="description">{{ .Description }}</p>
-            <div class="metadata">
-              <p class="source">{{ .Source.Name }}</p>
-              <time class="published-date">{{ .PublishedAt }}</time>
-           </div>
-         </div>
-         <img class="article-image" src="{{ .URLToImage }}" />
-        </li>
-       {{ end }}
-      </ul> -->
     </section><section class="container">
       <ul class="tide-results">
         {{ range.Results.predictions }}
         <li class="tide-output">
           <div>
-              <h3 class="Time">{{.Time }}</h3>
-              <h3 class="Value">{{.Value}}</h3>
-              <h3 class="HiLo">{{.HiLo}}</h3>
+              <h3 class="Time">{{ Results.Time }}</h3>
+              <h3 class="Value">{{ Results.Time.Value }}</h3>
+              <h3 class="HiLo">{{ Results.HiLo }}</h3>
            </div>
         </li>
        {{ end }}
